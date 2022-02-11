@@ -21,10 +21,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install test dependencies
-        run: pip3 install molecule[docker] yamllint ansible-lint ansible testinfra
-
-      # - name: Test
-      #   run: ls -lah
+        run: pip3 install molecule[docker] yamllint ansible-lint ansible testinfra pytest
 
       - name: Run Molecule test
         working-directory: ./ansible/roles/wireguard
@@ -32,6 +29,3 @@ jobs:
         env:
           PY_COLORS : '1'
           ANSIBLE_FORCE_COLOR: '1'
-
-      # - name: Test2
-      #   run: ls -lah    
