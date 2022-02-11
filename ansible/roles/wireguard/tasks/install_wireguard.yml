@@ -1,0 +1,7 @@
+---
+ - name: Install WireGuard and other requirements 
+   apt:
+     name:
+       - wireguard
+   state: present
+   update_cache: true

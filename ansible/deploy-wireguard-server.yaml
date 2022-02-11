@@ -1,0 +1,58 @@
+---
+- hosts: all
+  gather_facts: true
+  become: yes
+
+
+  pre_tasks:
+
+    - name: Run the equivalent of "apt-get update" as a separate step
+      apt:
+        update_cache: yes
+
+    - name: Create swap file
+      command: "fallocate -l 2G /swap_space"
+
+    - name: Set permission to swap file
+      command: "chmod 600 /swap_space "
+
+    - name: Mark file as a swap
+      command: "mkswap /swap_space "
+
+    - name: Enable swap
+      command: "swapon /swap_space"
+
+    - name: Edit /etc/fstab to make swap persistent
+      lineinfile:
+        dest: "/etc/fstab" 
+        state: present 
+        line: "/swap_space      swap        swap          sw          0   0 "
+        insertafter: EOF
+
+    # OCI specific block
+    - name: Stop iptables
+      service:
+        name: iptables
+        state: stopped
+
+    - name: Delete default reject rule
+      ansible.builtin.lineinfile: 
+        path: /etc/iptables/rules.v4
+        state: absent 
+        regexp: '{{ item }}'
+      loop: 
+       - '^-A INPUT -j REJECT --reject-with icmp-host-prohibited'
+       - '^-A FORWARD -j REJECT --reject-with icmp-host-prohibited'
+      register: default_rule_clean
+
+    - name: Restart iptables
+      service:
+        name: iptables
+        state: restarted
+
+    - name: Save firewall rule
+      command: netfilter-persistent save
+
+ 
+  roles:
+    - {role: 'wireguard_role', tags: 'wireguard'}
