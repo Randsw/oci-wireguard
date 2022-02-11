@@ -55,4 +55,4 @@
 
  
   roles:
-    - {role: 'wireguard_role', tags: 'wireguard'}
+    - {role: 'wireguard', tags: 'wireguard'}

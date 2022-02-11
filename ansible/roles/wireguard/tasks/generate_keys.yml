@@ -9,7 +9,7 @@
   register: key_files
   loop: "{{ range(0, clients) | list }}"
   #with_sequence: start=0 end={{ clients }}
-  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 
 - name: Register private key file contents
@@ -17,14 +17,14 @@
   register: private_key_files
   loop: "{{ range(0, clients) | list }}"
   #with_sequence: start=0 end={{ clients }}
-  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Register public key file contents
   shell: cat {{ item }}.public
   register: public_key_files
   loop: "{{ range(0, clients) | list }}"
   #with_sequence: start=0 end={{ clients }}
-  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Generate directories for client configs
   file:
@@ -35,7 +35,7 @@
     mode: 0600
   loop: "{{ range(1, clients) | list }}"
   #with_sequence: start=1 end={{ clients }}
-  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Generate client configs
   template:
@@ -46,18 +46,14 @@
     mode: 0600
   loop: "{{ range(1, clients) | list }}"
   #with_sequence: start=1 end={{ clients }}
-  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Stop any running Wireguard service
   systemd:
     name: wg-quick@wg0.service
     state: stopped
-  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf is not defined or not wg0_conf.stat.exists
 
-# Should happen last among the config file creations, so if the process 
-# is interrupted we will re-generate everything (the existence of the 
-# server config is used to determine whether to generate the server and 
-# client config files)
 - name: Generate server config
   template:
     src: "templates/server.conf.j2"
@@ -65,12 +61,12 @@
     owner: root
     group: root
     mode: 0600
-  when: wg0_conf.stat is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf.stat is not defined or not wg0_conf.stat.exists
 
 - name: Print server public key
   debug:
     var: public_key_files.results[0].stdout
-  when: wg0_conf.stat is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf.stat is not defined or not wg0_conf.stat.exists
 
 - name: Enable wireguard interface
   systemd:
@@ -79,13 +75,13 @@
     state: started
 
 - name: Register the clients on the vpn server
-  shell: wg set wg0 peer {{ public_key_files.results[item|int].stdout }} allowed-ips {{ vpn_network }}.{{item|int + 1}}/32
+  shell: wg set wg0 peer {{ public_key_files.results[item|int].stdout }} allowed-ips {{ vpn_network }}.{{ item|int + 1 }}/32
   loop: "{{ range(1, clients) | list }}"
   #with_sequence: start=1 end={{ clients }}
-  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Restart the VPN service to save changes
   systemd:
     name: wg-quick@wg0.service
     state: restarted
-  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+  when: wg0_conf is not defined or not wg0_conf.stat.exists

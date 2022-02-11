@@ -9,24 +9,25 @@
 
 - name: Enable IPv4 forwarding continued
   command: echo 1 > /proc/sys/net/ipv4/ip_forward
-  
+  changed_when: false
+
 #Set up firewall rules
 - name: Track input chain
-  iptables:
+  ansible.builtin.iptables:
     chain: INPUT
     match: conntrack
     ctstate: ESTABLISHED,RELATED
     jump: ACCEPT
 
-- name: Track forward chain  
-  iptables:
+- name: Track forward chain
+  ansible.builtin.iptables:
     chain: FORWARD
     match: conntrack
     ctstate: ESTABLISHED,RELATED
     jump: ACCEPT
 
-- name: Allow incoming wireguard connections    
-  iptables:
+- name: Allow incoming wireguard connections
+  ansible.builtin.iptables:
     chain: INPUT
     protocol: udp
     match: udp
@@ -34,8 +35,8 @@
     ctstate: NEW
     jump: ACCEPT
 
-- name: Allow forwarding of packets that stay in the tunnel 
-  iptables:
+- name: Allow forwarding of packets that stay in the tunnel
+  ansible.builtin.iptables:
     chain: FORWARD
     in_interface: wg0
     match: conntrack
@@ -44,12 +45,13 @@
     jump: ACCEPT
 
 - name: Set up NAT
-  iptables:
+  ansible.builtin.iptables:
     table: nat
     chain: POSTROUTING
     source: "{{ vpn_network }}.0/24"
     out_interface: "{{ ansible_default_ipv4.interface }}"
-    jump: MASQUERADE  
+    jump: MASQUERADE
 
 - name: Set up iptables persistence
   command: netfilter-persistent save
+  changed_when: false

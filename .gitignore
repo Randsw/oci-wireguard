@@ -2,3 +2,5 @@
 .terraform.lock.hcl
 .git
 terraform.tfstate*
+.vscode
+__pycache__
