@@ -24,7 +24,9 @@ jobs:
         run: pip3 install molecule[docker] yamllint ansible-lint
 
       - name: Run Molecule test
-        run: ansible/roles/wireguard/molecule test 
+        run: |
+            cd ansible/roles/wireguard
+            molecule test 
         env:
           PY_COLORS : '1'
           ANSIBLE_FORCE_COLOR: '1'
