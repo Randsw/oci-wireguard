@@ -8,6 +8,6 @@ vpn_network: '10.200.200'
 vpn_port: '51820'
 
 # Declare the number of clients
-clients: 2
+clients: 8
 
 client_config_path: '~/wireguard_role/profiles'
