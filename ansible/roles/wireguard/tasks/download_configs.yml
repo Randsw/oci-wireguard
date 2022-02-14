@@ -5,5 +5,4 @@
     dest: "{{ client_config_path }}/client_{{ item }}/"
     flat: yes
   loop: "{{ range(1, clients) | list }}"
-  #with_sequence: start=1 end={{ clients }}
   tags: "wg_fetch"

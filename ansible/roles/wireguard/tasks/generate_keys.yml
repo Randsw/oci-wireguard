@@ -8,7 +8,6 @@
   shell: umask 077; wg genkey | tee {{ item }}.private | wg pubkey > {{ item }}.public
   register: key_files
   loop: "{{ range(0, clients) | list }}"
-  #with_sequence: start=0 end={{ clients }}
   when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 
@@ -16,14 +15,12 @@
   shell: cat {{ item }}.private
   register: private_key_files
   loop: "{{ range(0, clients) | list }}"
-  #with_sequence: start=0 end={{ clients }}
   when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Register public key file contents
   shell: cat {{ item }}.public
   register: public_key_files
   loop: "{{ range(0, clients) | list }}"
-  #with_sequence: start=0 end={{ clients }}
   when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Generate directories for client configs
@@ -34,7 +31,6 @@
     group: root
     mode: 0600
   loop: "{{ range(1, clients) | list }}"
-  #with_sequence: start=1 end={{ clients }}
   when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Generate client configs
@@ -45,7 +41,6 @@
     group: root
     mode: 0600
   loop: "{{ range(1, clients) | list }}"
-  #with_sequence: start=1 end={{ clients }}
   when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Stop any running Wireguard service
@@ -77,7 +72,6 @@
 - name: Register the clients on the vpn server
   shell: wg set wg0 peer {{ public_key_files.results[item|int].stdout }} allowed-ips {{ vpn_network }}.{{ item|int + 1 }}/32
   loop: "{{ range(1, clients) | list }}"
-  #with_sequence: start=1 end={{ clients }}
   when: wg0_conf is not defined or not wg0_conf.stat.exists
 
 - name: Restart the VPN service to save changes
