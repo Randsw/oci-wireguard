@@ -22,5 +22,4 @@ provisioner:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
 verifier:
   name: testinfra
-  lint:
-    name: flake8
+
