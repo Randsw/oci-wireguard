@@ -1,6 +1,6 @@
 ---
 - name: Enable IPv4 traffic forwarding
-  sysctl:
+  ansible.builtin.sysctl:
     name: net.ipv4.ip_forward
     value: 1
     sysctl_set: yes
@@ -8,7 +8,7 @@
     reload: yes
 
 - name: Enable IPv4 forwarding continued
-  command: echo 1 > /proc/sys/net/ipv4/ip_forward
+  ansible.builtin.command: echo 1 > /proc/sys/net/ipv4/ip_forward
   changed_when: false
 
 # Set up firewall rules
@@ -53,5 +53,5 @@
     jump: MASQUERADE
 
 - name: Set up iptables persistence
-  command: netfilter-persistent save
+  ansible.builtin.command: netfilter-persistent save
   changed_when: false
