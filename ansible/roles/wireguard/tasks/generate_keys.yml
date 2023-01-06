@@ -70,7 +70,7 @@
     state: started
 
 - name: Register the clients on the vpn server
-  ansible.builtin.shell: wg set wg0 peer {{ public_key_files.results[item|int].stdout }} allowed-ips {{ vpn_network }}.{{ item|int + 1 }}/32
+  ansible.builtin.shell: wg set wg0 peer {{ public_key_files.results[item | int].stdout }} allowed-ips {{ vpn_network }}.{{ item | int + 1 }}/32
   loop: "{{ range(1, clients) | list }}"
   when: wg0_conf is not defined or not wg0_conf.stat.exists
 
