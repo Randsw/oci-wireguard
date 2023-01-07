@@ -10,24 +10,32 @@
       apt:
         update_cache: yes
 
-    - name: Create swap file
-      command: "fallocate -l 2G /swap_space"
+    - name: Check if swap file is present
+      stat:
+        path: /swap_space
+      register: stat_result
 
-    - name: Set permission to swap file
-      command: "chmod 600 /swap_space "
+    - name: Create swap if not already present
+      when: not stat_result.stat.exist 
+      block:
+        - name: Create swap file
+          command: "fallocate -l 2G /swap_space"
 
-    - name: Mark file as a swap
-      command: "mkswap /swap_space "
+        - name: Set permission to swap file
+          command: "chmod 600 /swap_space "
 
-    - name: Enable swap
-      command: "swapon /swap_space"
+        - name: Mark file as a swap
+          command: "mkswap /swap_space "
 
-    - name: Edit /etc/fstab to make swap persistent
-      lineinfile:
-        dest: "/etc/fstab" 
-        state: present 
-        line: "/swap_space      swap        swap          sw          0   0 "
-        insertafter: EOF
+        - name: Enable swap
+          command: "swapon /swap_space"
+
+        - name: Edit /etc/fstab to make swap persistent
+          lineinfile:
+            dest: "/etc/fstab" 
+            state: present 
+            line: "/swap_space      swap        swap          sw          0   0 "
+            insertafter: EOF
 
     - name: Install  netfilter-persistent
       package:
@@ -35,6 +43,7 @@
         state: present
 
     - name: OCI specific block for iptables
+      when: oci_based_deploy is defined
       block:
         - name: Stop iptables
           service:
@@ -58,7 +67,6 @@
 
         - name: Save firewall rule
           command: netfilter-persistent save
-      when: oci_based is defined
 
   roles:
     - {role: 'wireguard', tags: 'wireguard'}
