@@ -37,9 +37,9 @@
             line: "/swap_space      swap        swap          sw          0   0 "
             insertafter: EOF
 
-    - name: Install  netfilter-persistent
+    - name: Install iptables-persistent
       package:
-        name: netfilter-persistent
+        name: iptables-persistent
         state: present
 
     - name: OCI specific block for iptables

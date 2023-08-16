@@ -53,5 +53,5 @@
     jump: MASQUERADE
 
 - name: Set up iptables persistence
-  ansible.builtin.command: netfilter-persistent save
+  ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4
   changed_when: false
